@@ -49,35 +49,17 @@ class ProduitsViewModel(application: Application) : AndroidViewModel(application
     val uiState: StateFlow<EtatUi> =
         combine(
             dao.tousLesProduits(),
+            dao.parPrixDecroissant(),
+            dao.stockSuperieurA(10.0),
+            dao.stockTotal(),
             mode,
-        ) { produits, modeCourant ->
-            EtatUi(produits = produits, mode = modeCourant)
-
-            // ----------------------------------------------------------------
-            // ÉTAPE 3 — brancher VOS requêtes (après les TODO du DAO)
-            //
-            // 1) Ajoutez vos Flow aux arguments de combine(), par exemple :
-            //
-            //      combine(
-            //          dao.tousLesProduits(),
-            //          dao.parPrixDecroissant(),       // votre TODO 1
-            //          dao.stockSuperieurA(10.0),      // votre TODO 2
-            //          dao.stockTotal(),               // votre TODO 3
-            //          mode,
-            //      ) { parNom, parPrix, stockOk, total, modeCourant ->
-            //
-            // 2) Choisissez la liste selon le mode :
-            //
-            //      val liste = when (modeCourant) {
-            //          ModeAffichage.NOM -> parNom
-            //          ModeAffichage.PRIX_DECROISSANT -> parPrix
-            //          ModeAffichage.STOCK_SUFFISANT -> stockOk
-            //      }
-            //      EtatUi(produits = liste, mode = modeCourant, stockTotal = total)
-            //
-            // Objectif minimal : AU MOINS un mode réellement branché,
-            // et le stock total affiché.
-            // ----------------------------------------------------------------
+        ) { parNom, parPrix, stockOk, total, modeCourant ->
+            val liste = when (modeCourant) {
+                ModeAffichage.NOM -> parNom
+                ModeAffichage.PRIX_DECROISSANT -> parPrix
+                ModeAffichage.STOCK_SUFFISANT -> stockOk
+            }
+            EtatUi(produits = liste, mode = modeCourant, stockTotal = total)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
